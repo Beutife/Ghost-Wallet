@@ -1,17 +1,19 @@
-const { ethers } = require("hardhat");
+// import hre from "hardhat";
 
-async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log("Deployer:", deployer.address);
+// const { ethers } = hre;
 
-  const Factory = await ethers.getContractFactory("Factory");
-  const factory = await Factory.deploy();
-  await factory.waitForDeployment();
+// async function main() {
+//   const [deployer] = await ethers.getSigners();
+//   console.log("Deployer:", deployer.address);
 
-  console.log("Factory deployed to:", await factory.getAddress());
-}
+//   const Factory = await ethers.getContractFactory("Factory");
+//   const factory = await Factory.deploy();
+//   await factory.waitForDeployment();
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+//   console.log("Factory deployed to:", await factory.getAddress());
+// }
+
+// main().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
