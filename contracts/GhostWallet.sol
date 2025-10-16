@@ -10,9 +10,7 @@ contract GhostWallet is ReentrancyGuard {
 
     address public owner;
     address public immutable entryPoint;
-    bool private _swept;
-    bool private _destroyed;
-    bool public destroyed = false;
+    bool public destroyed;
     EphemeralKey public ephemeralKey;
 
 
@@ -22,7 +20,7 @@ contract GhostWallet is ReentrancyGuard {
     }
 
     
-    event WalletCreated(address indexed target, uint256 value, bytes data);
+    event Executed(address indexed target, uint256 value);
     event Swept(address indexed to, uint256 amount);
     event Destroyed(address indexed to, uint256 amount);
     event WalletBatchExecuted(uint256 count);
@@ -50,13 +48,18 @@ contract GhostWallet is ReentrancyGuard {
         _;
     }
 
-    modifier onlyOwnerOrEphemeral() {
-        require(msg.sender == owner || (msg.sender == ephemeralKey.key && block.timestamp < ephemeralKey.expiresAt),"Not authorized");
+    modifier onlyAuthorized() {
+        require(
+            msg.sender == owner || 
+            msg.sender == entryPoint ||
+            (msg.sender == ephemeralKey.key && block.timestamp < ephemeralKey.expiresAt),
+            "Not authorized"
+        );
         _;
     }
 
     
-    function CreateWallet(address target,uint256 value, bytes memory data) external nonReentrant onlyOwner notDestroyed {
+    function execute(address target,uint256 value, bytes memory data) external nonReentrant onlyAuthorized notDestroyed {
         require(target != address(0), "Target cannot be zero");
         require(address(this).balance >= value, "Insufficient balance");
 
@@ -68,40 +71,47 @@ contract GhostWallet is ReentrancyGuard {
 
     }
 
-        emit WalletCreated(target, value, data);
+        emit Executed(target, value);
     }
 
   
-    function sweep(address payable _to) external nonReentrant onlyOwner {
+    function sweep(address payable _to) external nonReentrant onlyOwner notDestroyed {
         require(_to != address(0), "Recipient cannot be zero");
 
         uint256 amount = address(this).balance;
+        require(amount > 0, "No funds to sweep");
+
         Address.sendValue(_to, amount);
-        _swept = true;
 
         emit Swept(_to, amount);
     }
 
    
-    function destroy(address payable _to) external onlyOwner notDestroyed {
+    function destroy(address payable _to) external nonReentrant onlyOwner notDestroyed {
         require(_to != address(0), "Recipient cannot be zero");
-        require(_swept, "Must sweep before destroy");
+        
 
         uint256 amount = address(this).balance;
-        Address.sendValue(_to, amount);
-
-         _destroyed = true;
-         owner = address(0);
-
+         if (amount > 0) {
+            Address.sendValue(_to, amount);
+        }
+        
+        destroyed = true;
         emit Destroyed(_to, amount);
        
     }
 
-    function executeBatch(address[] calldata targets, uint256[] calldata values,bytes[] calldata datas) external onlyOwner {
-        require(targets.length == datas.length && targets.length == values.length,"Invalid array lengths");
+    function executeBatch(address[] calldata targets, uint256[] calldata values,bytes[] calldata datas) external nonReentrant onlyAuthorized notDestroyed {
+            require(targets.length == values.length && targets.length == datas.length,"Array length mismatch");        
         for (uint256 i = 0; i < targets.length; i++) {
-        (bool success, bytes memory result) = targets[i].call{value: values[i]}(datas[i]);
-        require(success, string(result));
+             require(targets[i] != address(0), "Invalid target");
+            (bool success, bytes memory result) = targets[i].call{value: values[i]}(datas[i]);
+
+            if (!success) {
+                assembly {
+                    revert(add(result, 32), mload(result))
+                }
+            }
         }
 
         emit WalletBatchExecuted(targets.length);
@@ -109,17 +119,23 @@ contract GhostWallet is ReentrancyGuard {
     }
 
 
-    function addEphemeralKey(address _key, uint256 duration) external onlyOwner {
-         require(duration <= 90 days, "Max duration exceeded");
+    function addEphemeralKey(address _key, uint256 duration) external onlyOwner notDestroyed {
+        require(_key != address(0), "Invalid key");
+        require(duration > 0 && duration <= 90 days, "Invalid duration");        
+
         ephemeralKey = EphemeralKey(_key, block.timestamp + duration);
 
         emit EphemeralKeyAdded(_key, ephemeralKey.expiresAt);   
     }
 
-    function revokeEphemeralKey() external onlyOwner {
-        
-        emit EphemeralKeyRevoked(ephemeralKey.key);
+    function revokeEphemeralKey() external onlyOwner notDestroyed {
+        address key = ephemeralKey.key;
         delete ephemeralKey;
+        emit EphemeralKeyRevoked(key);
+    }
+
+     function isEphemeralKeyValid() external view returns (bool) {
+        return ephemeralKey.key != address(0) && block.timestamp < ephemeralKey.expiresAt;
     }
 
 
