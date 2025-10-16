@@ -32,9 +32,10 @@ contract EntryPoint is ReentrancyGuard {
     event GasSponsored(address indexed user, uint256 gasCost);
 
     constructor(address _paymaster) {
-        require(_paymaster != address(0), "Invalid paymaster");
-        paymaster = _paymaster;
-        emit PaymasterSet(_paymaster);
+         paymaster = _paymaster;
+            if (_paymaster != address(0)) {
+                 emit PaymasterSet(_paymaster);
+            }
     }
 
     function setPaymaster(address _paymaster) external {
