@@ -11,16 +11,16 @@ contract GhostWallet is ReentrancyGuard {
     address public owner;
     address public immutable entryPoint;
     bool public destroyed;
-    EphemeralKey public ephemeralKey;
 
+    mapping(address => EphemeralKey) private ephemeralKeyData;
 
     struct EphemeralKey {
-        address key;
         uint256 expiresAt;
+        bool isActive;
     }
 
     
-    event Executed(address indexed target, uint256 value);
+    event WalletExecuted(address indexed target, uint256 value);
     event Swept(address indexed to, uint256 amount);
     event Destroyed(address indexed to, uint256 amount);
     event WalletBatchExecuted(uint256 count);
@@ -49,10 +49,13 @@ contract GhostWallet is ReentrancyGuard {
     }
 
     modifier onlyAuthorized() {
+        bool isValidKey = ephemeralKeyData[msg.sender].isActive && 
+                         block.timestamp < ephemeralKeyData[msg.sender].expiresAt;
+        
         require(
             msg.sender == owner || 
             msg.sender == entryPoint ||
-            (msg.sender == ephemeralKey.key && block.timestamp < ephemeralKey.expiresAt),
+            isValidKey,
             "Not authorized"
         );
         _;
@@ -71,7 +74,7 @@ contract GhostWallet is ReentrancyGuard {
 
     }
 
-        emit Executed(target, value);
+        emit WalletExecuted(target, value);
     }
 
   
@@ -119,23 +122,29 @@ contract GhostWallet is ReentrancyGuard {
     }
 
 
-    function addEphemeralKey(address _key, uint256 duration) external onlyOwner notDestroyed {
+    function addEphemeralKey(address _key) external onlyOwner notDestroyed {
         require(_key != address(0), "Invalid key");
-        require(duration > 0 && duration <= 90 days, "Invalid duration");        
+        require(!ephemeralKeyData[_key].isActive, "Key already active");
 
-        ephemeralKey = EphemeralKey(_key, block.timestamp + duration);
+        uint256 expiresAt = block.timestamp + 1 hours;
 
-        emit EphemeralKeyAdded(_key, ephemeralKey.expiresAt);   
+        ephemeralKeyData[_key] = EphemeralKey({
+            expiresAt: expiresAt,
+            isActive: true
+        });
+
+        emit EphemeralKeyAdded(_key, expiresAt);
     }
 
-    function revokeEphemeralKey() external onlyOwner notDestroyed {
-        address key = ephemeralKey.key;
-        delete ephemeralKey;
-        emit EphemeralKeyRevoked(key);
+     function revokeEphemeralKey(address _key) external onlyOwner notDestroyed {
+        require(ephemeralKeyData[_key].isActive, "Key not active");
+        
+        ephemeralKeyData[_key].isActive = false;
+        emit EphemeralKeyRevoked(_key);
     }
 
-     function isEphemeralKeyValid() external view returns (bool) {
-        return ephemeralKey.key != address(0) && block.timestamp < ephemeralKey.expiresAt;
+     function isEphemeralKeyValid(address _key) external view returns (bool) {
+        return ephemeralKeyData[_key].isActive && block.timestamp < ephemeralKeyData[_key].expiresAt;
     }
 
 
