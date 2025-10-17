@@ -1,0 +1,32 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "IPaymaster",
+  "sourceName": "contracts/EntryPoint.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "gasCost",
+          "type": "uint256"
+        }
+      ],
+      "name": "sponsorGas",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/EntryPoint.sol",
+  "buildInfoId": "solc-0_8_28-360554dc2442ec691320d98113b8affc6a14fbe7"
+}

@@ -1,0 +1,4 @@
+const { ethers } = require("hardhat");
+const [signer] = await ethers.getSigners();
+console.log(signer.address);
+const [signer] = await ethers.getSigners();
