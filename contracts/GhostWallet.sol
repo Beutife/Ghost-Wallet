@@ -26,6 +26,7 @@ contract GhostWallet is ReentrancyGuard {
     event WalletBatchExecuted(uint256 count);
     event EphemeralKeyAdded(address key, uint256 expiresAt);
     event EphemeralKeyRevoked(address key);
+    event Deposited(address indexed from, uint256 amount);
 
     
 
@@ -37,6 +38,12 @@ contract GhostWallet is ReentrancyGuard {
     }
 
     receive() external payable {}
+
+
+    function deposit() external payable notDestroyed {
+        require(msg.value > 0, "Must send ETH");
+        emit Deposited(msg.sender, msg.value);
+    }
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not owner");

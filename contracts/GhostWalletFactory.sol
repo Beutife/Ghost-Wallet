@@ -7,13 +7,18 @@ import "./EntryPoint.sol";
 
 contract GhostFactory {
 
+     address public immutable entryPoint;
      mapping(address => address[]) private userWallets;
 
     event GhostCreated(address wallet, address owner);
 
-    function createGhost(address owner, address entryPoint) external returns (address) {
-        GhostWallet wallet = new GhostWallet(owner, entryPoint);
+     constructor(address _entryPoint) {
+        require(_entryPoint != address(0), "Invalid EntryPoint");
+        entryPoint = _entryPoint;
+    }
 
+    function createGhost(address owner) external payable returns (address) {
+        GhostWallet wallet = new GhostWallet{value: msg.value}(owner, entryPoint);
         userWallets[owner].push(address(wallet));
 
         emit GhostCreated(address(wallet), owner);
