@@ -14,5 +14,9 @@
   "Paymaster": {
     "address": "0x588461C2a48Ea3D3897f2df23E77dE20095cFAD7",
     "abi": "./artifacts/contracts/PayMaster.sol/Paymaster.json"
+  },
+  "ZkProofVerifier": {
+    "address": "0x1c6Ed9059009a5F4e80E971C150cA3712c484De3",
+    "abi": "./artifacts/contracts/ZkProofVerifier.sol/ZkProofVerifier.json"
   }
 }
