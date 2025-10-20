@@ -5,13 +5,19 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { 
+    ignores: ["dist", ".next", "node_modules", "build", "out", ".vercel"] 
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      sourceType: "module",
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
     plugins: {
       "react-hooks": reactHooks,
@@ -20,7 +26,10 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // REMOVED the problematic rule - it doesn't exist in typescript-eslint v8
+      // "@typescript-eslint/no-explicit-any": "warn", 
       "@typescript-eslint/no-unused-vars": "off",
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
 );
