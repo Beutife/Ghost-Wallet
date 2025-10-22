@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { GHOST_WALLET_ABI } from "@/lib/contracts";
 import { toast } from "sonner";
 
@@ -36,12 +36,18 @@ export default function DestroyGhostModal({
   onSuccess,
 }: DestroyGhostModalProps) {
   const { address: mainWallet } = useAccount();
-  const { writeContract, isPending } = useWriteContract();
+  const publicClient = usePublicClient();
+  const { writeContractAsync, isPending } = useWriteContract();
   const [confirmed, setConfirmed] = useState(false);
 
   const handleDestroy = async () => {
     if (!mainWallet) {
       toast.error("Main wallet not connected");
+      return;
+    }
+
+    if (!publicClient) {
+      toast.error("Blockchain client not available");
       return;
     }
 
@@ -52,25 +58,31 @@ export default function DestroyGhostModal({
 
     try {
       // Call destroy function (automatically sweeps remaining funds)
-      await writeContract({
+      const txHash = await writeContractAsync({
         address: ghostAddress,
         abi: GHOST_WALLET_ABI,
         functionName: "destroy",
-        args: [mainWallet], // recipient (main wallet)
+        args: [mainWallet],
       });
+
+      // Wait for transaction confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+      if (receipt.status !== "success") {
+        throw new Error(`Transaction failed: ${receipt.status}`);
+      }
 
       // Clean up local storage
       localStorage.removeItem(`ghost_key_${ghostAddress}`);
       localStorage.removeItem(`ghost_metadata_${ghostAddress}`);
       sessionStorage.removeItem(`session_${ghostAddress}`);
 
-      toast.success("Ghost wallet destroyed 👻💨");
+      toast.success(`Ghost wallet "${ghostName}" destroyed 👻💨`);
       onSuccess();
       onOpenChange(false);
       setConfirmed(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to destroy ghost:", error);
-      toast.error("Failed to destroy ghost wallet");
+      toast.error(error.message || "Failed to destroy ghost wallet");
     }
   };
 
@@ -82,9 +94,7 @@ export default function DestroyGhostModal({
             <AlertTriangle className="h-5 w-5 text-red-500" />
             Destroy Ghost Wallet?
           </DialogTitle>
-          <DialogDescription>
-            This action cannot be undone
-          </DialogDescription>
+          <DialogDescription>This action cannot be undone</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -92,7 +102,7 @@ export default function DestroyGhostModal({
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Warning:</strong> This will permanently destroy "{ghostName}"
+              <strong>Warning:</strong> This will permanently destroy "{ghostName || "Ghost Wallet"}"
             </AlertDescription>
           </Alert>
 
@@ -100,10 +110,10 @@ export default function DestroyGhostModal({
           <div className="space-y-2">
             <p className="text-sm font-semibold">What will happen:</p>
             <ul className="space-y-1 text-sm text-muted-foreground">
-              <li>• Remaining balance ({balance} USDC) will be sent to your main wallet</li>
+              <li>• Remaining balance ({parseFloat(balance).toFixed(2)} USDC) will be sent to your main wallet</li>
               <li>• Ghost wallet contract will be destroyed</li>
               <li>• All encrypted keys will be deleted locally</li>
-              <li>• Transaction history will be cleared</li>
+              <li>• Transaction history will remain on the blockchain</li>
               <li>• This action is permanent and cannot be reversed</li>
             </ul>
           </div>
@@ -126,7 +136,7 @@ export default function DestroyGhostModal({
           {/* Ghost Info */}
           <div className="text-center py-4 border rounded-lg">
             <span className="text-4xl mb-2 block opacity-50">👻</span>
-            <p className="font-semibold">{ghostName}</p>
+            <p className="font-semibold">{ghostName || "Ghost Wallet"}</p>
             <p className="text-sm text-muted-foreground font-mono">
               {ghostAddress.slice(0, 10)}...{ghostAddress.slice(-8)}
             </p>
@@ -134,7 +144,7 @@ export default function DestroyGhostModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             Cancel
           </Button>
           <Button

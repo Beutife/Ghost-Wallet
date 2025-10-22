@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import SendPaymentModal from "@/components/modals/SendPaymentModal";
 import SweepFundsModal from "@/components/modals/SweepFundsModal";
+import DestroyWallet from "@/components/modals/DestroyGhostModal"
 import { CONTRACTS, ERC20_ABI } from "@/lib/contracts";
 import { formatUnits } from "viem";
 import { toast } from "sonner";
@@ -25,7 +26,7 @@ export default function GhostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [sendOpen, setSendOpen] = useState(false);
   const [sweepOpen, setSweepOpen] = useState(false);
-
+  const [destroyOpen, setDestroyOpen] = useState(false)
   const ghostAddress = params.address as string;
 
   useEffect(() => {
@@ -255,7 +256,7 @@ export default function GhostDetailPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Permanently destroy this ghost wallet.
               </p>
-              <Button variant="destructive" className="w-full" disabled>
+              <Button variant="destructive" onClick={()=> setDestroyOpen(true)} className="w-full" disabled>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Destroy Ghost
               </Button>
@@ -278,6 +279,15 @@ export default function GhostDetailPage() {
         ghostAddress={ghostAddress as `0x${string}`}
         balance={balance}
         onSuccess={handleRefresh}
+      />
+
+      <DestroyWallet 
+      open = {destroyOpen}
+      onOpenChange={setDestroyOpen}
+      ghostAddress={ghostAddress as `0x${string}`}
+      ghostName= {metadata.name || "Ghost Wallet"}
+      balance={balance}
+      onSuccess={handleRefresh}
       />
     </div>
   );
