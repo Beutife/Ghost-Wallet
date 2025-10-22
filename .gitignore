@@ -1,1 +1,8 @@
-node_modules
+# Node modules (all)
+**/node_modules
+
+# Next.js build folder
+frontend/.next
+
+# Environment files
+.env
