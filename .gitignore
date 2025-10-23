@@ -1,4 +1,8 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+frontend/.next/
+
+frontend/node_modules/
+
+node_modules/# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -39,3 +43,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+*.log
+frontend/cache/
+frontend/eslint-debug.txt
+/frontend/package-lock.json

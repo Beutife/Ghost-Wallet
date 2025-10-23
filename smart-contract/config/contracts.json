@@ -1,0 +1,22 @@
+{
+  "EntryPoint": {
+    "address": "0xE6c991a4ccd7474F49F070e7FCFeEf83A9cD9fb1",
+    "abi": "./artifacts/contracts/EntryPoint.sol/EntryPoint.json"
+  },
+  "GhostFactory": {
+    "address": "0x6de81d30A2D1d2F71D1A016cDe371c9700509760",
+    "abi": "./artifacts/contracts/GhostWalletFactory.sol/GhostFactory.json"
+  },
+  "GhostWallet": {
+    "address": "0x0f48B47a2f49A94a2a7b30550BE822817c1FBA00",
+    "abi": "./artifacts/contracts/GhostWallet.sol/GhostWallet.json"
+  },
+  "Paymaster": {
+    "address": "0x588461C2a48Ea3D3897f2df23E77dE20095cFAD7",
+    "abi": "./artifacts/contracts/PayMaster.sol/Paymaster.json"
+  },
+  "ZkProofVerifier": {
+    "address": "0x1c6Ed9059009a5F4e80E971C150cA3712c484De3",
+    "abi": "./artifacts/contracts/ZkProofVerifier.sol/ZkProofVerifier.json"
+  }
+}
