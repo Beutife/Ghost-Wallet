@@ -256,7 +256,7 @@ export default function GhostDetailPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Permanently destroy this ghost wallet.
               </p>
-              <Button variant="destructive" onClick={()=> setDestroyOpen(true)} className="w-full" disabled>
+              <Button variant="destructive" onClick={()=> setDestroyOpen(true)} className="w-full" >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Destroy Ghost
               </Button>
