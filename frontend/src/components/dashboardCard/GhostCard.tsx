@@ -120,7 +120,7 @@ export default function GhostCard({ ghost, index, onRefetch }: GhostCardProps) {
             <p className="text-sm font-medium">
               {ghost.isExpired
                 ? "Expired"
-                : formatDistanceToNow(ghost.expiresAt * 1000, { addSuffix: true })}
+                : formatDistanceToNow(ghost.expiresAt, { addSuffix: true })}
             </p>
           </div>
           <div className="relative w-full h-2 bg-muted rounded-full overflow-hidden">
@@ -134,7 +134,7 @@ export default function GhostCard({ ghost, index, onRefetch }: GhostCardProps) {
         {/* Stats */}
         <div className="flex items-center justify-between pt-4 border-t border-border/50 mb-4">
           <p className="text-xs text-muted-foreground">
-            Created {formatDistanceToNow(ghost.createdAt * 1000, { addSuffix: true })}
+            Created {formatDistanceToNow(ghost.createdAt , { addSuffix: true })}
           </p>
           <p className="text-xs text-muted-foreground">
             {ghost.transactions} transactions
