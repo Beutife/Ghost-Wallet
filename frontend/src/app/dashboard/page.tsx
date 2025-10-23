@@ -1,8 +1,11 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { useRouter } from "next/navigation"; // ✅ Only one router import
+import { useRouter } from "next/navigation"; // Only one router import
 import { Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";

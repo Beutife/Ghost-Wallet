@@ -12,7 +12,7 @@ export const config = createConfig({
       metadata: {
         name: "Ghost Wallet",
         description: "Temporary smart wallets that auto-expire",
-        url: "https://ghostwallet.xyz",
+        url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         icons: ["https://ghostwallet.xyz/icon.png"],
       },
       showQrModal: true,
