@@ -127,7 +127,7 @@ export default function CreateGhostModal({
         },
       ] as const;
       const logs = parseEventLogs({
-        abi: GHOST_FACTORY_ABI, // Use full ABI to ensure compatibility
+        abi: GHOST_FACTORY_ABI, 
         eventName: "GhostCreated",
         logs: receipt.logs,
       });
@@ -302,6 +302,7 @@ export default function CreateGhostModal({
                   <div>
                     <Label>Max per transaction</Label>
                     <Input
+                     min={1}
                       type="number"
                       placeholder="50"
                       value={formData.maxPerTx}

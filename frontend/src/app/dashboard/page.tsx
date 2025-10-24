@@ -31,7 +31,7 @@ interface Ghost {
 }
 
 export default function Dashboard() {
-  // ✅ ALL HOOKS AT THE TOP - BEFORE ANY CONDITIONALS OR RETURNS
+  //  ALL HOOKS AT THE TOP - BEFORE ANY CONDITIONALS OR RETURNS
   const { address, isConnected } = useAccount();
   const router = useRouter();
   const { hasPassword } = useSession();
@@ -41,12 +41,12 @@ export default function Dashboard() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "expired">("all");
 
-  // ✅ Handle client-side hydration
+  //  Handle client-side hydration
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ✅ Redirect logic after mount
+  //  Redirect logic after mount
   // useEffect(() => {
   //   if (!mounted) return;
   //   if (isConnected && !hasPassword) {
@@ -54,7 +54,7 @@ export default function Dashboard() {
   //   }
   // }, [mounted, isConnected, hasPassword, router]);
 
-  // ✅ Filter ghosts
+  //  Filter ghosts
   const filteredGhosts = ghosts.filter((ghost: Ghost) => {
     if (filter === "all") return true;
     if (filter === "active") return ghost.sessionActive && !ghost.isExpired;
@@ -92,19 +92,16 @@ export default function Dashboard() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               You haven't deposited to the Privacy Pool yet. Deposit funds to
-              anonymously fund your ghost wallets.
-              <Button variant="link" className="ml-2">
-                Deposit Now
-              </Button>
+              anonymously fund your ghost wallets. Deposit
             </AlertDescription>
           </Alert>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in">
-          <StatsCard icon="👻" label="Active Ghosts" value={stats.activeGhosts} />
-          <StatsCard icon="🔮" label="Total Created" value={stats.totalCreated} />
-          <StatsCard icon="💰" label="Total Value" value={`$${stats.totalValue}`} />
-          <StatsCard icon="⚡" label="Gas Saved" value={`$${stats.gasSaved}`} />
+          <StatsCard icon="" label="Active Ghosts" value={stats.activeGhosts} />
+          <StatsCard icon="" label="Total Created" value={stats.totalCreated} />
+          <StatsCard icon="" label="Total Value" value={`$${stats.totalValue}`} />
+          <StatsCard icon="" label="Gas Saved" value={`$${stats.gasSaved}`} />
         </div>
 
         <div className="flex items-center justify-between mb-8">
