@@ -84,9 +84,9 @@ export async function fetchTransactions(
       `${BLOCKSCOUT_BASE_URL}/addresses/${address}/transactions?filter=${encodeURIComponent(filter)}`
     );
     
-    if (!response.ok) {
-      throw new Error(`Blockscout API error: ${response.status}`);
-    }
+    // if (!response.ok) {
+    //   throw new Error(`Blockscout API error: ${response.status}`);
+    // }
     
     const data = await response.json();
     return data.items || [];
@@ -102,21 +102,21 @@ export async function fetchTransactions(
  * @returns Transaction details
  */
 export async function fetchTransaction(
-  txHash: string
-): Promise<BlockscoutTransaction | null> {
+  address: string
+): Promise<BlockscoutTransaction[]> {
   try {
     const response = await fetch(
-      `${BLOCKSCOUT_BASE_URL}/transactions/${txHash}`
+      `https://base-sepolia.blockscout.com/api/v2/addresses/${address}/transactions`
     );
     
-    if (!response.ok) {
-      throw new Error(`Blockscout API error: ${response.status}`);
-    }
+    if (!response.ok) return [];
     
-    return await response.json();
+    
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error("Failed to fetch transaction:", error);
-    return null;
+    return [];
   }
 }
 

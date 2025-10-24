@@ -107,7 +107,7 @@ export default function GhostCard({ ghost, index, onRefetch }: GhostCardProps) {
                 Session Active
               </p>
               <p className="text-xs text-muted-foreground">
-                Expires {formatDistanceToNow(ghost.sessionExpiresAt * 1000, { addSuffix: true })}
+                Expires {formatDistanceToNow(ghost.sessionExpiresAt, { addSuffix: true })}
               </p>
             </div>
           </div>
