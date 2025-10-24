@@ -158,7 +158,7 @@ npm run dev
 [Launch Demo](#) <!-- TODO: Add demo URL -->
 
 ### Video Walkthrough
-[Watch on YouTube](#) <!-- TODO: Add video URL -->
+[Watch on YouTube](https://youtu.be/NrW5uc3P3YU?si=jU_KEqJV5rrqJ5ER) <!-- TODO: Add video URL -->
 
 ### Screenshots
 
