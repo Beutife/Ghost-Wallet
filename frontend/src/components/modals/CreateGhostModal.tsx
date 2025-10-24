@@ -127,7 +127,7 @@ export default function CreateGhostModal({
         },
       ] as const;
       const logs = parseEventLogs({
-        abi: GHOST_FACTORY_ABI, // Use full ABI to ensure compatibility
+        abi: GHOST_FACTORY_ABI, 
         eventName: "GhostCreated",
         logs: receipt.logs,
       });
@@ -302,6 +302,7 @@ export default function CreateGhostModal({
                   <div>
                     <Label>Max per transaction</Label>
                     <Input
+                     min={1}
                       type="number"
                       placeholder="50"
                       value={formData.maxPerTx}
@@ -331,7 +332,6 @@ export default function CreateGhostModal({
               <p className="text-sm">• Funding: {formData.amount || "0"} USDC</p>
               <p className="text-sm">• Duration: {formData.duration} days</p>
               <p className="text-sm">• Expires: {calculateExpiry()}</p>
-              <p className="text-sm">• Gas fees: FREE ✨</p>
             </div>
           </div>
         )}
@@ -341,7 +341,7 @@ export default function CreateGhostModal({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Enter your master password to encrypt this wallet's keys
+                Enter your master password 
               </AlertDescription>
             </Alert>
 
@@ -363,7 +363,7 @@ export default function CreateGhostModal({
             <Loader2 className="h-12 w-12 animate-spin mx-auto" />
             <div>
               <p className="font-semibold">Creating ghost wallet...</p>
-              <p className="text-sm text-muted-foreground mt-2">
+              {/* <p className="text-sm text-muted-foreground mt-2">
                 1. Generating ephemeral keys...
               </p>
               <p className="text-sm text-muted-foreground">
@@ -371,7 +371,7 @@ export default function CreateGhostModal({
               </p>
               <p className="text-sm text-muted-foreground">
                 3. Encrypting keys locally...
-              </p>
+              </p> */}
             </div>
           </div>
         )}

@@ -112,7 +112,7 @@ export default function DestroyGhostModal({
             <ul className="space-y-1 text-sm text-muted-foreground">
               <li>• Remaining balance ({parseFloat(balance).toFixed(2)} USDC) will be sent to your main wallet</li>
               <li>• Ghost wallet contract will be destroyed</li>
-              <li>• All encrypted keys will be deleted locally</li>
+              {/* <li>• All encrypted keys will be deleted locally</li> */}
               <li>• Transaction history will remain on the blockchain</li>
               <li>• This action is permanent and cannot be reversed</li>
             </ul>

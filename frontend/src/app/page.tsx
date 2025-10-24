@@ -3,25 +3,22 @@
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Clock, DollarSign, Zap } from "lucide-react";
 import Link from "next/link";
 
 const Index = () => {
   const features = [
     {
-      icon: Clock,
+      
       emoji: "⏰",
       title: "Auto-Expire",
       description: "Set custom durations. Wallets automatically expire and return your funds safely.",
     },
     {
-      icon: DollarSign,
       emoji: "💰",
       title: "Spending Limits",
       description: "Lock in exact amounts. Never overspend on temporary purchases or gifts.",
     },
     {
-      icon: Zap,
       emoji: "⚡",
       title: "Gasless Transactions",
       description: "Zero gas fees on all operations. We handle the blockchain complexity for you.",
@@ -81,7 +78,6 @@ const Index = () => {
             >
               <div className="mb-6">
                 <span className="text-6xl block mb-4 group-hover:animate-float">{feature.emoji}</span>
-                <feature.icon className="h-12 w-12 mx-auto text-primary opacity-50" />
               </div>
               
               <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -121,9 +117,6 @@ const Index = () => {
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <span>Built on</span>
           <span className="font-bold text-primary">Base</span>
-          <span>•</span>
-          <span>Powered by</span>
-          <span className="font-bold text-accent">Lit Protocol</span>
         </div>
       </footer>
     </div>

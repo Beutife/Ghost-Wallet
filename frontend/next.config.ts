@@ -7,8 +7,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // ✅ Fix IndexedDB error
+  //  Fix IndexedDB error
   webpack: (config) => {
+    config.resolve.alias['@react-native-async-storage/async-storage'] = false;
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
