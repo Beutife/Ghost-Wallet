@@ -5,7 +5,7 @@
 
 ## 🔗 Quick Links
 
-- [Live Demo](#) <!-- TODO: Add demo URL -->
+- [Live Demo](https://ghost-wallet-seven.vercel.app/) <!-- TODO: Add demo URL -->
 - [Video Walkthrough](https://youtu.be/NrW5uc3P3YU?si=jU_KEqJV5rrqJ5ER) <!-- TODO: Add video URL -->
 - [Smart Contracts](./smart-contract/contracts) 
 
@@ -120,7 +120,6 @@ With GhostWallet, users can:
 
 > 📁 All deployed contract addresses are available in `smart-contracts/contracts/config/contracts.json`
 
-[View Contracts on BaseScan](#) <!-- TODO: Add BaseScan link -->
 
 ---
 
@@ -155,7 +154,7 @@ npm run dev
 ## 🎬 Demo
 
 ### Live Application
-[Launch Demo](#) <!-- TODO: Add demo URL -->
+[Launch Demo](https://ghost-wallet-seven.vercel.app/) <!-- TODO: Add demo URL -->
 
 ### Video Walkthrough
 [Watch on YouTube](https://youtu.be/NrW5uc3P3YU?si=jU_KEqJV5rrqJ5ER) <!-- TODO: Add video URL -->
