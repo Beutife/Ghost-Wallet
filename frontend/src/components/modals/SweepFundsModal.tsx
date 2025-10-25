@@ -122,7 +122,7 @@ export default function SweepFundsModal({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Gas fees:</span>
-              <span className="text-green-500">FREE ✨</span>
+              <span className="text-green-500">Sponsored</span>
             </div>
           </div>
         </div>
