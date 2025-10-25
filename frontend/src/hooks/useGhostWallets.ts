@@ -2,148 +2,180 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useReadContract, usePublicClient } from "wagmi";
-import { CONTRACTS, GHOST_FACTORY_ABI, GHOST_WALLET_ABI, ERC20_ABI } from "@/lib/contracts";
+import { usePublicClient } from "wagmi";
+import { CONTRACTS, ERC20_ABI } from "@/lib/contracts";
 import type { GhostWallet, DashboardStats } from "@/types/ghost";
-import { formatUnits, isAddress } from "viem";
+import { formatUnits } from "viem";
 
 export function useGhostWallets(userAddress: `0x${string}` | undefined) {
+  const publicClient = usePublicClient();
   const [ghosts, setGhosts] = useState<GhostWallet[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     activeGhosts: 0,
     totalCreated: 0,
-    totalValue: "0",
-    gasSaved: "0",
+    totalValue: "0.00",
+    gasSaved: "0.00",
     privacyPoolBalance: "0",
   });
   const [loading, setLoading] = useState(true);
-  const publicClient = usePublicClient();
-
-
-  //  Read ghost addresses from contract
-  const {
-    data: ghostAddresses,
-    refetch: refetchAddresses,
-    isLoading: isLoadingAddresses,
-  } = useReadContract({
-    address: CONTRACTS.GHOST_FACTORY,
-    abi: GHOST_FACTORY_ABI,
-    functionName: "getUserWallets",
-    args: userAddress ? [userAddress] : undefined,
-    query: {
-      enabled: !!userAddress,
-    },
-  });
 
   useEffect(() => {
-    //  Early return without setState to prevent infinite loops
-    if (!ghostAddresses || !publicClient || !userAddress) {
-      // Only update if values actually changed
-      if (loading) setLoading(false);
-      if (ghosts.length > 0) setGhosts([]);
-      return;
+    if (userAddress) {
+      loadGhosts();
+    } else {
+      setLoading(false);
     }
+  }, [userAddress]);
 
-    let mounted = true; //  Cleanup flag
+  const loadGhosts = async () => {
+    if (typeof window === "undefined" || !userAddress) return;
 
-    const loadGhostDetails = async () => {
-      if (!mounted) return;
+    try {
       setLoading(true);
 
-      try {
-        const addresses = ghostAddresses as `0x${string}`[];
-        const ghostDetails: GhostWallet[] = [];
+      // Step 1: Load metadata from localStorage (FAST - no blockchain calls)
+      const ghostWallets: GhostWallet[] = [];
+      const keys = Object.keys(localStorage);
 
-        for (const address of addresses) {
-          if (!mounted) break; // Check if still mounted
-          if (!isAddress(address)) {
-            console.warn(`Invalid ghost wallet address: ${address}`);
-            continue;
+      for (const key of keys) {
+        if (key.startsWith("ghost_metadata_")) {
+          const address = key.replace("ghost_metadata_", "");
+          const metaStr = localStorage.getItem(key);
+
+          if (metaStr) {
+            try {
+              const meta = JSON.parse(metaStr);
+
+              // Only load wallets created by this user
+              if (meta.creator?.toLowerCase() === userAddress.toLowerCase()) {
+                const now = Date.now();
+                const createdAt = meta.createdAt || now;
+                const duration = meta.duration || 7; // days
+                const expiresAt = createdAt + duration * 24 * 60 * 60 * 1000;
+                const isExpired = now > expiresAt;
+
+                // Add to list with placeholder balance
+                ghostWallets.push({
+                  address: address as `0x${string}`,
+                  name: meta.name || "Ghost Wallet",
+                  balance: "0", // Placeholder - will load async
+                  usdValue: "0",
+                  createdAt,
+                  expiresAt,
+                  sessionActive: false,
+                  isExpired,
+                  transactions: 0,
+                  owner: userAddress,
+                  isDestroyed: false
+                });
+              }
+            } catch (error) {
+              console.error(`Failed to parse metadata for ${address}:`, error);
+            }
           }
+        }
+      }
 
-          // Read balance from USDC contract
+      // Sort by creation date (newest first)
+      ghostWallets.sort((a, b) => b.createdAt - a.createdAt);
+
+      // Set ghosts immediately with placeholder balances
+      setGhosts(ghostWallets);
+      setLoading(false); // Stop loading indicator
+
+      // Step 2: Load balances asynchronously (background)
+      if (publicClient && ghostWallets.length > 0) {
+        loadBalancesAsync(ghostWallets);
+      } else {
+        calculateStats(ghostWallets);
+      }
+    } catch (error) {
+      console.error("Failed to load ghosts:", error);
+      setLoading(false);
+    }
+  };
+
+  const loadBalancesAsync = async (ghostWallets: GhostWallet[]) => {
+    if (!publicClient) return;
+
+    try {
+      // Load all balances in parallel for speed
+      const balancePromises = ghostWallets.map(async (ghost) => {
+        try {
           const balance = await publicClient.readContract({
             address: CONTRACTS.USDC,
             abi: ERC20_ABI,
             functionName: "balanceOf",
-            args: [address],
+            args: [ghost.address as `0x${string}`],
           });
 
-          
-
-          // Read destroyed status
-          const isDestroyed = await publicClient.readContract({
-            address,
-            abi: GHOST_WALLET_ABI,
-            functionName: "destroyed",
-            args: [],
-          });
-
-          // ✅ Safe localStorage access (client-side only)
-          let metadata = {};
-          if (typeof window !== "undefined") {
-            const metadataStr = localStorage.getItem(`ghost_metadata_${address}`);
-            metadata = metadataStr ? JSON.parse(metadataStr) : {};
-          }
-
-          const createdAt = (metadata as any).createdAt || Date.now() / 1000;
-          const duration = (metadata as any).duration || 30;
-          const expiresAt = createdAt + duration * 86400;
-
-          ghostDetails.push({
-            address,
-            name: (metadata as any).name || "Ghost Wallet",
-            balance: balance ? formatUnits(balance as bigint, 6) : "0",
-            usdValue: balance ? formatUnits(balance as bigint, 6) : "0",
-            createdAt,
-            expiresAt,
-            sessionActive: false, // Will be updated by useSession separately
-            isExpired: Date.now() / 1000 > expiresAt,
-            isDestroyed: !!isDestroyed,
-            transactions: 0,
-            owner: userAddress,
-          });
+          const balanceFormatted = formatUnits(balance as bigint, 6);
+          return {
+            address: ghost.address,
+            balance: balanceFormatted,
+            usdValue: balanceFormatted,
+          };
+        } catch (error) {
+          console.error(`Failed to load balance for ${ghost.address}:`, error);
+          return {
+            address: ghost.address,
+            balance: "0",
+            usdValue: "0",
+          };
         }
+      });
 
-        if (!mounted) return; // Final check before setState
+      // Wait for all balances
+      const balances = await Promise.all(balancePromises);
 
-        setGhosts(ghostDetails);
+      // Update ghosts with real balances
+      const updatedGhosts = ghostWallets.map((ghost) => {
+        const balanceData = balances.find((b) => b.address === ghost.address);
+        return {
+          ...ghost,
+          balance: balanceData?.balance || "0",
+          usdValue: balanceData?.usdValue || "0",
+        };
+      });
 
-        // Calculate stats
-        const activeCount = ghostDetails.filter((g) => !g.isExpired).length;
-        const totalValue = ghostDetails.reduce(
-          (sum, g) => sum + parseFloat(g.usdValue),
-          0
-        );
+      setGhosts(updatedGhosts);
+      calculateStats(updatedGhosts);
+    } catch (error) {
+      console.error("Failed to load balances:", error);
+      calculateStats(ghostWallets); // Calculate with placeholder balances
+    }
+  };
 
-        setStats({
-          activeGhosts: activeCount,
-          totalCreated: ghostDetails.length,
-          totalValue: totalValue.toFixed(2),
-          gasSaved: "0",
-          privacyPoolBalance: "0",
-        });
-      } catch (error) {
-        console.error("Failed to load ghosts:", error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
+  const calculateStats = (ghostWallets: GhostWallet[]) => {
+    const now = Date.now();
+    const activeGhosts = ghostWallets.filter(
+      (g) => !g.isExpired && now < g.expiresAt
+    ).length;
 
-    loadGhostDetails();
+    const totalValue = ghostWallets
+      .reduce((sum, g) => sum + parseFloat(g.balance || "0"), 0)
+      .toFixed(2);
 
-    // ✅ Cleanup function
-    return () => {
-      mounted = false;
-    };
-  }, [ghostAddresses, userAddress, publicClient]); // ✅ Removed getSessionExpiry dependency
+    // Estimate gas saved (assuming each ghost saves ~$5 in gas fees)
+    const gasSaved = (ghostWallets.length * 5).toFixed(2);
+
+    setStats({
+      activeGhosts,
+      totalCreated: ghostWallets.length,
+      totalValue,
+      gasSaved,
+      privacyPoolBalance: "0", // TODO: Implement privacy pool balance
+    });
+  };
+
+  const refetch = () => {
+    loadGhosts();
+  };
 
   return {
     ghosts,
     stats,
-    loading: loading || isLoadingAddresses,
-    refetch: refetchAddresses,
+    loading,
+    refetch,
   };
 }

@@ -5,7 +5,7 @@ export const fetchCache = "force-no-store";
 
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { useRouter } from "next/navigation"; // Only one router import
+import { useRouter } from "next/navigation";
 import { Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -31,7 +31,6 @@ interface Ghost {
 }
 
 export default function Dashboard() {
-  //  ALL HOOKS AT THE TOP - BEFORE ANY CONDITIONALS OR RETURNS
   const { address, isConnected } = useAccount();
   const router = useRouter();
   const { hasPassword } = useSession();
@@ -41,20 +40,22 @@ export default function Dashboard() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "expired">("all");
 
-  //  Handle client-side hydration
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  //  Redirect logic after mount
-  // useEffect(() => {
-  //   if (!mounted) return;
-  //   if (isConnected && !hasPassword) {
-  //     router.push("/onboarding");
-  //   }
-  // }, [mounted, isConnected, hasPassword, router]);
+  // Debug logging
+  useEffect(() => {
+    console.log("=== DASHBOARD DEBUG ===");
+    console.log("Connected address:", address);
+    console.log("Ghosts found:", ghosts.length);
+    console.log("Ghosts data:", ghosts);
+    console.log("Loading state:", loading);
+    console.log("Stats:", stats);
+    console.log("======================");
+  }, [ghosts, address, loading, stats]);
 
-  //  Filter ghosts
+  // Filter ghosts
   const filteredGhosts = ghosts.filter((ghost: Ghost) => {
     if (filter === "all") return true;
     if (filter === "active") return ghost.sessionActive && !ghost.isExpired;
@@ -62,9 +63,31 @@ export default function Dashboard() {
     return true;
   });
 
-  //  Show loading during hydration
+  // Show skeleton during hydration
   if (!mounted) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-6 pt-24 pb-12">
+          {/* Skeleton Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 bg-muted/30 rounded-lg animate-pulse" />
+            ))}
+          </div>
+          
+          {/* Skeleton Header */}
+          <div className="h-20 bg-muted/30 rounded-lg animate-pulse mb-8" />
+          
+          {/* Skeleton Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-64 bg-muted/30 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Show connect wallet message
@@ -87,37 +110,65 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-6 pt-24 pb-12">
+        {/* Privacy Pool Alert */}
         {stats.privacyPoolBalance === '0' && (
           <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               You haven't deposited to the Privacy Pool yet. Deposit funds to
-              anonymously fund your ghost wallets. Deposit
+              anonymously fund your ghost wallets.
             </AlertDescription>
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in">
-          <StatsCard icon="" label="Active Ghosts" value={stats.activeGhosts} />
-          <StatsCard icon="" label="Total Created" value={stats.totalCreated} />
-          <StatsCard icon="" label="Total Value" value={`$${stats.totalValue}`} />
-          <StatsCard icon="" label="Gas Saved" value={`$${stats.gasSaved}`} />
+        {/* Stats Cards - Show immediately with loading state */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <StatsCard 
+            icon="" 
+            label="Active Ghosts" 
+            value={loading ? "..." : stats.activeGhosts} 
+          />
+          <StatsCard 
+            icon="" 
+            label="Total Created" 
+            value={loading ? "..." : stats.totalCreated} 
+          />
+          <StatsCard 
+            icon="" 
+            label="Total Value" 
+            value={loading ? "..." : `$${stats.totalValue}`} 
+          />
+          <StatsCard 
+            icon="" 
+            label="Gas Saved" 
+            value={loading ? "..." : `$${stats.gasSaved}`} 
+          />
         </div>
 
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2">Your Ghost Wallets</h1>
-            <p className="text-muted-foreground">Manage your temporary wallets</p>
+            <p className="text-muted-foreground">
+              {loading 
+                ? "Loading your wallets..." 
+                : ghosts.length === 0
+                  ? "No ghost wallets yet"
+                  : `Manage your ${ghosts.length} temporary wallet${ghosts.length !== 1 ? 's' : ''}`
+              }
+            </p>
           </div>
           <Button
             className="gradient-purple text-primary-foreground glow-effect hover:opacity-90 transition-opacity"
             onClick={() => setCreateModalOpen(true)}
+            disabled={loading}
           >
             <Plus className="mr-2 h-5 w-5" />
             Create Ghost
           </Button>
         </div>
 
+        {/* Filter Tabs */}
         <div className="flex gap-2 mb-6">
           {["all", "active", "expired"].map((tab) => (
             <Button
@@ -126,21 +177,33 @@ export default function Dashboard() {
               size="sm"
               onClick={() => setFilter(tab as typeof filter)}
               className="capitalize"
+              disabled={loading}
             >
               {tab}
+              {!loading && filter === tab && (
+                <span className="ml-2 text-xs opacity-70">
+                  ({filteredGhosts.length})
+                </span>
+              )}
             </Button>
           ))}
         </div>
 
+        {/* Ghost Cards */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin text-4xl mb-4">👻</div>
-            <p className="text-muted-foreground">Loading your ghosts...</p>
+          // Skeleton cards while loading
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div 
+                key={i} 
+                className="h-64 bg-muted/30 rounded-lg animate-pulse"
+              />
+            ))}
           </div>
         ) : filteredGhosts.length === 0 ? (
           <EmptyState filter={filter} onCreateClick={() => setCreateModalOpen(true)} />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredGhosts.map((ghost: Ghost, index: number) => (
               <GhostCard
                 key={ghost.address}
@@ -151,12 +214,34 @@ export default function Dashboard() {
             ))}
           </div>
         )}
+
+        {/* Show loading indicator at bottom if still loading */}
+        {loading && ghosts.length > 0 && (
+          <div className="text-center mt-8 text-muted-foreground">
+            <div className="animate-spin inline-block text-2xl mb-2">👻</div>
+            <p className="text-sm">Loading balances...</p>
+          </div>
+        )}
+
+        {/* Debug Info (remove in production) */}
+        {process.env.NODE_ENV === 'development' && !loading && (
+          <div className="mt-8 p-4 bg-muted rounded-lg text-xs font-mono">
+            <p>Debug Info:</p>
+            <p>• Connected: {address}</p>
+            <p>• Ghosts Found: {ghosts.length}</p>
+            <p>• Filtered: {filteredGhosts.length}</p>
+            <p>• Filter: {filter}</p>
+          </div>
+        )}
       </div>
 
       <CreateGhostModal
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
-        onSuccess={refetch}
+        onSuccess={() => {
+          console.log("✅ Ghost created, triggering refetch...");
+          refetch();
+        }}
       />
     </div>
   );
