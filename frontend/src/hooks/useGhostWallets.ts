@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { usePublicClient } from "wagmi";
 import { CONTRACTS, ERC20_ABI } from "@/lib/contracts";
-//import type { GhostWallet, DashboardStats } from "@/types/ghost";
 import { formatUnits } from "viem";
 
 

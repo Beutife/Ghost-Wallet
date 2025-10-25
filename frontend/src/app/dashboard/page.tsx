@@ -45,9 +45,20 @@ export default function Dashboard() {
   }, []);
 
   if (!mounted) {
-    return ("Not mounted")
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container mx-auto px-6 pt-24 pb-12">
+        {/* Skeleton Stats */}
+        ...
+      </div>
+      </div>
+    );
   }
+
   // Debug logging
+
+  
   useEffect(() => {
     console.log("=== DASHBOARD DEBUG ===");
     console.log("Connected address:", address);
@@ -59,7 +70,7 @@ export default function Dashboard() {
   }, [ghosts, address, loading, stats]);
 
   // Filter ghosts
-  const filteredGhosts = ghosts.filter((ghost: Ghost) => {
+  const filteredGhosts = ghosts?.filter((ghost: Ghost) => {
     if (filter === "all") return true;
     if (filter === "active") return ghost.sessionActive && !ghost.isExpired;
     if (filter === "expired") return ghost.isExpired;
@@ -114,7 +125,7 @@ export default function Dashboard() {
       <Navbar />
       <div className="container mx-auto px-6 pt-24 pb-12">
         {/* Privacy Pool Alert */}
-        {stats.privacyPoolBalance === '0' && (
+        {stats?.privacyPoolBalance === '0' && (
           <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -123,6 +134,7 @@ export default function Dashboard() {
             </AlertDescription>
           </Alert>
         )}
+
 
         {/* Stats Cards - Show immediately with loading state */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
