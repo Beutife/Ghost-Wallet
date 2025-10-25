@@ -44,6 +44,9 @@ export default function Dashboard() {
     setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return ("Not mounted")
+  }
   // Debug logging
   useEffect(() => {
     console.log("=== DASHBOARD DEBUG ===");
