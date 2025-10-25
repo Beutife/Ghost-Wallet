@@ -6,9 +6,8 @@
 ## 🔗 Quick Links
 
 - [Live Demo](#) <!-- TODO: Add demo URL -->
-- [Video Walkthrough](#) <!-- TODO: Add video URL -->
+- [Video Walkthrough](https://youtu.be/NrW5uc3P3YU?si=jU_KEqJV5rrqJ5ER) <!-- TODO: Add video URL -->
 - [Smart Contracts](./smart-contract/contracts) 
-- [Documentation](#how-it-works)
 
 ---
 
@@ -30,7 +29,6 @@ With GhostWallet, users can:
 - 🏭 **Create Burner Wallets** - Generate temporary, unlinkable wallets on-demand
 - ⏱️ **Start Timed Sessions** - Activate wallets with 1-hour ephemeral keys
 - 💸 **Execute Transactions** - Send funds privately without revealing your identity
-- 📦 **Batch Operations** - Execute multiple transactions in a single call
 - 🧹 **Sweep & Destroy** - Recover remaining funds and permanently delete wallets
 
 ---
@@ -160,7 +158,7 @@ npm run dev
 [Launch Demo](#) <!-- TODO: Add demo URL -->
 
 ### Video Walkthrough
-[Watch on YouTube](#) <!-- TODO: Add video URL -->
+[Watch on YouTube](https://youtu.be/NrW5uc3P3YU?si=jU_KEqJV5rrqJ5ER) <!-- TODO: Add video URL -->
 
 ### Screenshots
 
