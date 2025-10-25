@@ -4,8 +4,32 @@
 import { useState, useEffect } from "react";
 import { usePublicClient } from "wagmi";
 import { CONTRACTS, ERC20_ABI } from "@/lib/contracts";
-import type { GhostWallet, DashboardStats } from "@/types/ghost";
 import { formatUnits } from "viem";
+
+
+export interface GhostWallet {
+  address: `0x${string}`;
+  name: string;
+  balance: string; // In USDC (e.g., "100.50")
+  usdValue: string; // Always same as balance for stablecoin
+  createdAt: number; // Unix timestamp
+  expiresAt: number; // Unix timestamp
+  sessionActive: boolean;
+  sessionExpiresAt?: number;
+  isExpired: boolean;
+  isDestroyed: boolean;
+  transactions: number;
+  owner: `0x${string}`;
+}
+
+export interface DashboardStats {
+  activeGhosts: number;
+  totalCreated: number;
+  totalValue: string;
+  gasSaved: string;
+  privacyPoolBalance: string;
+}
+
 
 export function useGhostWallets(userAddress: `0x${string}` | undefined) {
   const publicClient = usePublicClient();

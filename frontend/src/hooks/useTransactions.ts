@@ -7,7 +7,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Transaction } from "@/types/ghost";
 
 interface BlockscoutTransaction {
   hash: string;
@@ -17,6 +16,17 @@ interface BlockscoutTransaction {
   timestamp: string;
   status: "ok" | "error";
 }
+
+export interface Transaction {
+  hash: `0x${string}`;
+  from: `0x${string}`;
+  to: `0x${string}`;
+  value: string;
+  timestamp: number;
+  status: "pending" | "success" | "failed";
+  type: "send" | "receive" | "sweep" | "destroy";
+}
+
 
 export function useTransactions(ghostAddress: `0x${string}` | undefined) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);

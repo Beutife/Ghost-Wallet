@@ -16,6 +16,7 @@ import EmptyState from "@/components/dashboardCard/EmptyState";
 import CreateGhostModal from "@/components/modals/CreateGhostModal";
 import { useGhostWallets } from "@/hooks/useGhostWallets";
 import { useSession } from "@/hooks/useSession";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Ghost {
   address: string;
@@ -36,15 +37,20 @@ export default function Dashboard() {
   const { hasPassword } = useSession();
   const { ghosts, stats, loading, refetch } = useGhostWallets(address);
   
-  const [mounted, setMounted] = useState(false);
+  // const [mounted, setMounted] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "expired">("all");
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+
 
   // Debug logging
+
+  
   useEffect(() => {
     console.log("=== DASHBOARD DEBUG ===");
     console.log("Connected address:", address);
@@ -56,7 +62,7 @@ export default function Dashboard() {
   }, [ghosts, address, loading, stats]);
 
   // Filter ghosts
-  const filteredGhosts = ghosts.filter((ghost: Ghost) => {
+  const filteredGhosts = ghosts?.filter((ghost: Ghost) => {
     if (filter === "all") return true;
     if (filter === "active") return ghost.sessionActive && !ghost.isExpired;
     if (filter === "expired") return ghost.isExpired;
@@ -111,7 +117,7 @@ export default function Dashboard() {
       <Navbar />
       <div className="container mx-auto px-6 pt-24 pb-12">
         {/* Privacy Pool Alert */}
-        {stats.privacyPoolBalance === '0' && (
+        {stats?.privacyPoolBalance === '0' && (
           <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -120,6 +126,7 @@ export default function Dashboard() {
             </AlertDescription>
           </Alert>
         )}
+
 
         {/* Stats Cards - Show immediately with loading state */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
