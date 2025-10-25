@@ -1,31 +1,19 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePublicClient } from "wagmi";
-import { ArrowLeft, Send, Download, Trash2, Copy, ExternalLink, RefreshCw, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowLeft, Send, Download, Trash2, Copy, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import SendPaymentModal from "@/components/modals/SendPaymentModal";
 import SweepFundsModal from "@/components/modals/SweepFundsModal";
-import DestroyWallet from "@/components/modals/DestroyGhostModal"
 import { CONTRACTS, ERC20_ABI } from "@/lib/contracts";
 import { formatUnits } from "viem";
 import { toast } from "sonner";
-import { 
-  fetchTransactions, 
-  fetchUSDCBalance,
-  formatTransactionValue,
-  formatRelativeTime,
-  getTransactionDirection,
-  getTransactionUrl,
-  type BlockscoutTransaction 
-} from "@/lib/blockscout-service";
+import DestroyWallet from "@/components/modals/DestroyGhostModal";
 
 export default function GhostDetailPage() {
   const params = useParams();
@@ -36,12 +24,9 @@ export default function GhostDetailPage() {
   const [metadata, setMetadata] = useState<any>({});
   const [balance, setBalance] = useState("0");
   const [loading, setLoading] = useState(true);
-  const [loadingTx, setLoadingTx] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [sweepOpen, setSweepOpen] = useState(false);
-  const [destroyOpen, setDestroyOpen] = useState(false);
-  const [transactions, setTransactions] = useState<BlockscoutTransaction[]>([]);
-  const ghostAddress = params.address as string;
+ const  [destroyOpen, setDestroyOpen] = useState(false);  const ghostAddress = params.address as string;
 
   useEffect(() => {
     setMounted(true);
@@ -56,6 +41,8 @@ export default function GhostDetailPage() {
       setMetadata(meta);
 
       // Load real balance from blockchain
+      setLoading(false);
+
       if (publicClient) {
         try {
           const bal = await publicClient.readContract({
@@ -71,22 +58,6 @@ export default function GhostDetailPage() {
         }
       }
       
-      // Load transactions from Blockscout
-      await loadTransactions();
-      
-      setLoading(false);
-    }
-  };
-
-  const loadTransactions = async () => {
-    setLoadingTx(true);
-    try {
-      const txs = await fetchTransactions(ghostAddress);
-      setTransactions(txs.slice(0, 20)); // Show last 20 transactions
-    } catch (error) {
-      console.error("Failed to load transactions:", error);
-    } finally {
-      setLoadingTx(false);
     }
   };
 
@@ -114,17 +85,6 @@ export default function GhostDetailPage() {
     if (!metadata.createdAt || !metadata.duration) return "N/A";
     const expiryDate = new Date(metadata.createdAt + metadata.duration * 24 * 60 * 60 * 1000);
     return expiryDate.toLocaleDateString();
-  };
-
-  const getMethodLabel = (method: string) => {
-    if (!method) return "Transfer";
-    const methodMap: Record<string, string> = {
-      "transfer": "Transfer",
-      "approve": "Approve",
-      "execute": "Execute",
-      "multicall": "Batch",
-    };
-    return methodMap[method] || method;
   };
 
   if (!mounted) {
@@ -222,160 +182,25 @@ export default function GhostDetailPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Transaction History</h3>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={loadTransactions}
-                    disabled={loadingTx}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-1 ${loadingTx ? "animate-spin" : ""}`} />
-                    Refresh
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => window.open(`https://base-sepolia.blockscout.com/address/${ghostAddress}`, "_blank")}
-                  >
-                    View on Blockscout →
-                  </Button>
-                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => window.open(`https://sepolia.basescan.org/address/${ghostAddress}`, "_blank")}
+                >
+                  View on Explorer →
+                </Button>
               </div>
 
-              {loadingTx ? (
-                <div className="text-center text-muted-foreground py-8">
-                  <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
-                  <p>Loading transactions...</p>
-                </div>
-              ) : transactions.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">
-                  <p className="mb-2">No transactions yet</p>
-                  <p className="text-sm">
-                    Transactions will appear here once you send or receive funds
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {transactions.map((tx) => {
-                    const direction = getTransactionDirection(tx, ghostAddress);
-                    const isIncoming = direction === "received";
-                    const isSelf = direction === "self";
-                    
-                    return (
-                      <div
-                        key={tx.hash}
-                        className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <div className={`p-2 rounded-full flex-shrink-0 ${
-                              isSelf 
-                                ? "bg-blue-500/20 text-blue-500"
-                                : isIncoming 
-                                  ? "bg-green-500/20 text-green-500" 
-                                  : "bg-red-500/20 text-red-500"
-                            }`}>
-                              {isSelf ? (
-                                <RefreshCw className="h-4 w-4" />
-                              ) : isIncoming ? (
-                                <ArrowDownRight className="h-4 w-4" />
-                              ) : (
-                                <ArrowUpRight className="h-4 w-4" />
-                              )}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <Badge 
-                                  variant="outline" 
-                                  className={`text-xs ${
-                                    isSelf
-                                      ? "bg-blue-500/20 text-blue-500 border-blue-500/30"
-                                      : isIncoming 
-                                        ? "bg-green-500/20 text-green-500 border-green-500/30" 
-                                        : "bg-red-500/20 text-red-500 border-red-500/30"
-                                  }`}
-                                >
-                                  {isSelf ? "Self" : direction}
-                                </Badge>
-                                <Badge 
-                                  variant="outline" 
-                                  className="text-xs bg-blue-500/20 text-blue-500 border-blue-500/30"
-                                >
-                                  {getMethodLabel(tx.method)}
-                                </Badge>
-                                {tx.status === "ok" && (
-                                  <Badge 
-                                    variant="outline" 
-                                    className="text-xs bg-green-500/20 text-green-500 border-green-500/30"
-                                  >
-                                    ✓
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                <span className="truncate">
-                                  {isIncoming ? "From" : "To"}:{" "}
-                                  {shortenAddress(isIncoming ? tx.from.hash : tx.to.hash)}
-                                </span>
-                                <span>•</span>
-                                <span className="whitespace-nowrap">
-                                  {formatRelativeTime(tx.timestamp)}
-                                </span>
-                              </div>
-                              
-                              <a
-                                href={getTransactionUrl(tx.hash)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-primary hover:underline flex items-center gap-1"
-                              >
-                                View Details
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right flex-shrink-0">
-                            <p className={`font-semibold ${
-                              isSelf ? "text-blue-500" : isIncoming ? "text-green-500" : ""
-                            }`}>
-                              {!isSelf && (isIncoming ? "+" : "-")}
-                              {formatTransactionValue(tx)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                  {transactions.length >= 20 && (
-                    <div className="text-center pt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(`https://base-sepolia.blockscout.com/address/${ghostAddress}`, "_blank")}
-                      >
-                        View All on Blockscout →
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <div className="mt-4 pt-4 border-t text-center">
-                <p className="text-xs text-muted-foreground">
-                  Powered by{" "}
-                  <a
-                    href="https://blockscout.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Blockscout
-                  </a>
-                </p>
+              <div className="text-center text-muted-foreground py-8">
+                <p className="mb-2">View all transactions on BaseScan</p>
+                <a
+                  href={`https://sepolia.basescan.org/address/${ghostAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Open Block Explorer →
+                </a>
               </div>
             </Card>
           </div>
@@ -431,7 +256,7 @@ export default function GhostDetailPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Permanently destroy this ghost wallet.
               </p>
-              <Button variant="destructive" onClick={()=> setDestroyOpen(true)} className="w-full" >
+              <Button variant="destructive" className="w-full" onClick={()=>setDestroyOpen(true)}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Destroy Ghost
               </Button>
