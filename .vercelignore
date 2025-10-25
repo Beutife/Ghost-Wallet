@@ -1,0 +1,7 @@
+artifacts/
+backend/
+cache/
+smart-contract/
+types/
+build-log.txt
+eslint-debug.txt
