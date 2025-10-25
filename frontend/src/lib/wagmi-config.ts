@@ -6,7 +6,7 @@ import { coinbaseWallet, walletConnect, injected } from "wagmi/connectors";
 const DEPLOYMENT_URL = 
   typeof window !== 'undefined' 
     ? window.location.origin 
-    : 'https://ghost-wallet-m5th.vercel.app';
+    : 'https://ghost-wallet-seven.vercel.app/';
 
 export const config = createConfig({
   chains: [baseSepolia],
