@@ -16,6 +16,7 @@ import EmptyState from "@/components/dashboardCard/EmptyState";
 import CreateGhostModal from "@/components/modals/CreateGhostModal";
 import { useGhostWallets } from "@/hooks/useGhostWallets";
 import { useSession } from "@/hooks/useSession";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Ghost {
   address: string;
@@ -36,25 +37,16 @@ export default function Dashboard() {
   const { hasPassword } = useSession();
   const { ghosts, stats, loading, refetch } = useGhostWallets(address);
   
-  const [mounted, setMounted] = useState(false);
+  // const [mounted, setMounted] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "expired">("all");
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+useEffect(() => {
+  setMounted(true);
+}, []);
 
-  if (!mounted) {
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto px-6 pt-24 pb-12">
-        {/* Skeleton Stats */}
-        ...
-      </div>
-      </div>
-    );
-  }
+
 
   // Debug logging
 
