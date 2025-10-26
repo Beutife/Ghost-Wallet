@@ -90,9 +90,11 @@ With GhostWallet, users can:
 - **ERC-4337** Account Abstraction standard
 
 ### Frontend
-- **[Framework]** <!-- TODO: Add framework (React/Next.js/etc) -->
-- **ethers.js** / **web3.js** for blockchain interaction
-- **WebCrypto API** for local key encryption
+- **Next.js**
+- **Tailwind**, **Shadcn**
+- **Blockscout** <!-- TODO: Add framework (React/Next.js/etc) -->
+- **ethers.js** / **Wagmi** **Viem** for blockchain interaction
+
 
 ### Backend
 - **Node.js** with Express
