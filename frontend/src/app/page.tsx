@@ -4,8 +4,24 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { sdk } from '@farcaster/miniapp-sdk';
+import { useEffect } from 'react';
+import { Metadata } from 'next';
+
 
 const Index = () => {
+
+  const metadata: Metadata = {
+    other: {
+      'base:app_id': '693b47cb8a7c4e55fec73ec6',
+    },
+  };
+
+  useEffect(() => {
+    sdk.actions.ready();
+    }, []);
+
+
   const features = [
     {
       
