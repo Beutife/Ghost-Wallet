@@ -14,7 +14,7 @@ export const metadata = {
 };
 export const metadata: Metadata = {
   other: {
-    'base:app_id': '693b47cb8a7c4e55fec73ec6',
+    'base:app_id': '693bf333e6be54f5ed71d779',
   },
 };
 
