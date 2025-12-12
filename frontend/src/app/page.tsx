@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { sdk } from '@farcaster/miniapp-sdk';
 import { useEffect } from 'react';
-import { Metadata } from 'next';
 
 
 const Index = () => {
