@@ -11,12 +11,7 @@ import { Metadata } from 'next';
 
 const Index = () => {
 
-  export const metadata: Metadata = {
-    other: {
-      'base:app_id': '693b47cb8a7c4e55fec73ec6',
-    },
-  };
-
+ 
   useEffect(() => {
     sdk.actions.ready();
     }, []);
