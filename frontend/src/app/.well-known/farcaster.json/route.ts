@@ -12,7 +12,7 @@ function withValidProperties(properties: Record<string, undefined | string | str
           "payload": "",
           "signature": ""
         },
-        "miniapp": {
+        "miniapp": { 
           "version": "1",
           "name": "Example Mini App",
           "homeUrl": "https://ex.co",
