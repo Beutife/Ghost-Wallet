@@ -5,13 +5,30 @@ function withValidProperties(properties: Record<string, undefined | string | str
     }
     
     export async function GET() {
-    const URL = process.env.NEXT_PUBLIC_URL as string;
+    const URL = process.env.NEXT_PUBLIC_URL || 'https://ghost-wallet-seven.vercel.app/' as string;
     return Response.json({
         "accountAssociation": {  // these will be added in step 5
           "header": "",
           "payload": "",
           "signature": ""
         },
+        other: {
+            'fc:miniapp': JSON.stringify({
+              version: 'next',
+              // Make sure this image URL is live and accessible!
+              imageUrl: `${APP_URL}/embed-image.png`, 
+              button: {
+                title: `Launch GhostWallet`,
+                action: {
+                  type: 'launch_miniapp',
+                  name: 'GhostWallet',
+                  url: APP_URL || https://ghost-wallet-seven.vercel.app/,
+                  splashImageUrl: `${APP_URL}/splash-image.png`,
+                  splashBackgroundColor: '#000000',
+                },
+              },
+            }),
+          },
         "miniapp": { 
           "version": "1",
           "name": "GhostWallet",
