@@ -14,7 +14,7 @@ function withValidProperties(properties: Record<string, undefined | string | str
         },
         "miniapp": { 
           "version": "1",
-          "name": "Example Mini App",
+          "name": "GhostWallet Mini App",
           "homeUrl": "https://ex.co",
           "iconUrl": "https://ex.co/i.png",
           "splashImageUrl": "https://ex.co/l.png",
