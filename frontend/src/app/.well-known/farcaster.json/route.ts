@@ -14,20 +14,20 @@ function withValidProperties(properties: Record<string, undefined | string | str
         },
         "miniapp": { 
           "version": "1",
-          "name": "GhostWallet Mini App",
+          "name": "GhostWallet",
           "homeUrl": "https://ex.co",
           "iconUrl": "https://ex.co/i.png",
           "splashImageUrl": "https://ex.co/l.png",
           "splashBackgroundColor": "#000000",
           "webhookUrl": "https://ex.co/api/webhook",
-          "subtitle": "Fast, fun, social",
+          "subtitle": "Secured way of transferring",
           "description": "A fast, fun way to challenge friends in real time.",
           "screenshotUrls": [
             "https://ex.co/s1.png",
             "https://ex.co/s2.png",
             "https://ex.co/s3.png"
           ],
-          "primaryCategory": "social",
+          "primaryCategory": "finance",
           "tags": ["example", "miniapp", "baseapp"],
           "heroImageUrl": "https://ex.co/og.png",
           "tagline": "Play instantly",
